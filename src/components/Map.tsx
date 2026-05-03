@@ -6,7 +6,12 @@ import { useStore } from "@nanostores/react";
 import * as turf from "@turf/turf";
 import * as L from "leaflet";
 import { useEffect, useMemo } from "react";
-import { MapContainer, ScaleControl, TileLayer } from "react-leaflet";
+import {
+    MapContainer,
+    ScaleControl,
+    TileLayer,
+    ZoomControl,
+} from "react-leaflet";
 import { toast } from "react-toastify";
 
 import {
@@ -14,7 +19,7 @@ import {
     addQuestion,
     animateMapMovements,
     autoZoom,
-    baseTileLayer,
+    mapTheme,
     followMe,
     hiderMode,
     isLoading,
@@ -26,7 +31,6 @@ import {
     polyGeoJSON,
     questionFinishedMapData,
     questions,
-    thunderforestApiKey,
     triggerLocalRefresh,
 } from "@/lib/context";
 import { cn } from "@/lib/utils";
@@ -35,12 +39,11 @@ import { hiderifyQuestion } from "@/maps";
 import { clearCache, determineMapBoundaries } from "@/maps/api";
 
 import { DraggableMarkers } from "./DraggableMarkers";
-import { LeafletFullScreenButton } from "./LeafletFullScreenButton";
-import { MapPrint } from "./MapPrint";
-import { PolygonDraw } from "./PolygonDraw";
 import { MBTAOverlay } from "./MBTAOverlay";
 
-const getTileLayer = (tileLayer: string, thunderforestApiKey: string) => {
+const getTileLayer = (tileLayer: string) => {
+    const thunderforestApiKey = import.meta.env.PUBLIC_THUNDERFOREST_APIKEY;
+
     switch (tileLayer) {
         case "light":
             return (
@@ -116,12 +119,13 @@ const getTileLayer = (tileLayer: string, thunderforestApiKey: string) => {
     );
 };
 
+const DEFAULT_ZOOM = 12;
+
 export const Map = ({ className }: { className?: string }) => {
     useStore(additionalMapGeoLocations);
     const $mapGeoLocation = useStore(mapGeoLocation);
     const $questions = useStore(questions);
-    const $baseTileLayer = useStore(baseTileLayer);
-    const $thunderforestApiKey = useStore(thunderforestApiKey);
+    const $baseTileLayer = useStore(mapTheme);
     const $hiderMode = useStore(hiderMode);
     const $isLoading = useStore(isLoading);
     const $followMe = useStore(followMe);
@@ -245,8 +249,9 @@ export const Map = ({ className }: { className?: string }) => {
         () => (
             <MapContainer
                 center={$mapGeoLocation.geometry.coordinates}
-                zoom={5}
+                zoom={DEFAULT_ZOOM}
                 className={cn("w-[500px] h-[500px]", className)}
+                zoomControl={false}
                 ref={leafletMapContext.set}
                 // @ts-expect-error Typing doesn't update from react-contextmenu
                 contextmenu={true}
@@ -369,31 +374,14 @@ export const Map = ({ className }: { className?: string }) => {
                     },
                 ]}
             >
-                {getTileLayer($baseTileLayer, $thunderforestApiKey)}
+                {getTileLayer($baseTileLayer)}
                 <DraggableMarkers />
-                <div className="leaflet-top leaflet-right">
-                    <div className="leaflet-control flex-col flex gap-2">
-                        <LeafletFullScreenButton />
-                    </div>
-                </div>
-                <PolygonDraw />
                 <MBTAOverlay />
+                <ZoomControl position="topright" />
                 <ScaleControl position="bottomleft" />
-                <MapPrint
-                    position="topright"
-                    sizeModes={["Current", "A4Portrait", "A4Landscape"]}
-                    hideControlContainer={false}
-                    hideClasses={[
-                        "leaflet-full-screen-specific-name",
-                        "leaflet-top",
-                        "leaflet-control-easyPrint",
-                        "leaflet-draw",
-                    ]}
-                    title="Print"
-                />
             </MapContainer>
         ),
-        [map, $baseTileLayer, $thunderforestApiKey],
+        [map, $baseTileLayer],
     );
 
     useEffect(() => {

@@ -16,7 +16,7 @@ import {
     animateMapMovements,
     autoSave,
     autoZoom,
-    baseTileLayer,
+    mapTheme,
     customInitPreference,
     customPresets,
     customStations,
@@ -39,8 +39,6 @@ import {
     polyGeoJSON,
     questions,
     save,
-    showTutorial,
-    thunderforestApiKey,
     triggerLocalRefresh,
     useCustomStations,
 } from "@/lib/context";
@@ -67,6 +65,7 @@ import {
     SidebarMenuItem,
 } from "./ui/sidebar-l";
 import { UnitSelect } from "./UnitSelect";
+import { ExternalLink, Settings } from "lucide-react";
 
 const HIDING_ZONE_URL_PARAM = "hz";
 const HIDING_ZONE_COMPRESSED_URL_PARAM = "hzc";
@@ -83,8 +82,7 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
     const $autoSave = useStore(autoSave);
     const $hidingZone = useStore(hidingZone);
     const $planningMode = useStore(planningModeEnabled);
-    const $baseTileLayer = useStore(baseTileLayer);
-    const $thunderforestApiKey = useStore(thunderforestApiKey);
+    const $mapTheme = useStore(mapTheme);
     const $pastebinApiKey = useStore(pastebinApiKey);
     const $alwaysUsePastebin = useStore(alwaysUsePastebin);
     const $followMe = useStore(followMe);
@@ -279,11 +277,12 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
     return (
         <div
             className={cn(
-                "flex justify-end gap-2 max-[412px]:!mb-4 max-[340px]:flex-col",
+                "flex justify-end gap-3 max-[412px]:!mb-4 max-[340px]:flex-col",
                 className,
             )}
         >
             <Button
+                size="icon"
                 className="shadow-md"
                 onClick={async () => {
                     const hidingZoneString = JSON.stringify($hidingZone);
@@ -350,23 +349,16 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                 }}
                 data-tutorial-id="share-questions-button"
             >
-                Share
-            </Button>
-            <Button
-                className="w-24 shadow-md"
-                onClick={() => {
-                    showTutorial.set(true);
-                }}
-            >
-                Tutorial
+                <ExternalLink />
             </Button>
             <Drawer open={isOptionsOpen} onOpenChange={setOptionsOpen}>
-                <DrawerTrigger className="w-24" asChild>
+                <DrawerTrigger asChild>
                     <Button
-                        className="w-24 shadow-md"
                         data-tutorial-id="option-questions-button"
+                        size="icon"
+                        className="shadow-md"
                     >
-                        Options
+                        <Settings />
                     </Button>
                 </DrawerTrigger>
                 <DrawerContent>
@@ -432,7 +424,7 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                                 }
                             />
                             <Separator className="bg-slate-300 w-[280px]" />
-                            <Label>Base map style</Label>
+                            <Label>Map theme</Label>
                             <Select
                                 trigger="Base map style"
                                 options={{
@@ -444,36 +436,9 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                                         "Thunderforest Neighbourhood",
                                     osmcarto: "OpenStreetMap Carto",
                                 }}
-                                value={$baseTileLayer}
-                                onValueChange={(v) =>
-                                    baseTileLayer.set(v as any)
-                                }
+                                value={$mapTheme}
+                                onValueChange={(v) => mapTheme.set(v as any)}
                             />
-                            <div className="flex flex-col items-center gap-2">
-                                <Label>Thunderforest API Key</Label>
-                                <Input
-                                    type="text"
-                                    value={$thunderforestApiKey}
-                                    id="thunderforestApiKey"
-                                    onChange={(e) =>
-                                        thunderforestApiKey.set(e.target.value)
-                                    }
-                                    placeholder="Enter your Thunderforest API key"
-                                />
-                                <p className="text-xs text-gray-500">
-                                    Needed for Thunderforest map styles. Create
-                                    a key{" "}
-                                    <a
-                                        href="https://manage.thunderforest.com/users/sign_up?price=hobby-project-usd"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-500 cursor-pointer"
-                                    >
-                                        here.
-                                    </a>{" "}
-                                    Don&apos;t worry, it&apos;s free.
-                                </p>
-                            </div>
                             <Separator className="bg-slate-300 w-[280px]" />
                             <div className="flex flex-col items-center gap-2">
                                 <Label>Pastebin API Key</Label>

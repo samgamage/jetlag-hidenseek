@@ -26,6 +26,9 @@ const routeIdColorMap = {
     Mattapan: "red",
 };
 
+const STOP_ICON_URL =
+    "https://upload.wikimedia.org/wikipedia/commons/6/64/MBTA.svg";
+
 const ZoomAwareMarker = ({
     position,
     label,
@@ -67,7 +70,6 @@ const ZoomAwareMarker = ({
 
 export const MBTAOverlay = ({ className }: { className?: string }) => {
     const $isLoading = useStore(isLoading);
-    const $mbtaRoutes = useStore(mbtaRoutes);
     const $mbtaData = useStore(mbtaData);
     const $mbtaStops = useStore(mbtaStops);
 
@@ -158,12 +160,6 @@ export const MBTAOverlay = ({ className }: { className?: string }) => {
         })();
     }, []);
 
-    useEffect(() => {
-        $mbtaRoutes.forEach((route) => {
-            fetchPolyline(route.id);
-        });
-    }, [$mbtaRoutes]);
-
     if ($isLoading) {
         return null;
     }
@@ -193,7 +189,7 @@ export const MBTAOverlay = ({ className }: { className?: string }) => {
                         minZoom={15}
                         icon={
                             new Icon({
-                                iconUrl: `https://upload.wikimedia.org/wikipedia/commons/6/64/MBTA.svg`,
+                                iconUrl: STOP_ICON_URL,
                                 iconSize: [15, 25],
                             })
                         }
