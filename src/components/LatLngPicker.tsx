@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebounce } from "@/hooks/useDebounce";
 import { allowGooglePlusCodes, isLoading } from "@/lib/context";
-import { cn } from "@/lib/utils";
+import { cn, normalizeDecimalInput } from "@/lib/utils";
 import { determineName, geocode, ICON_COLORS } from "@/maps/api";
 
 import { Button } from "./ui/button";
@@ -185,13 +185,17 @@ const LatLngEditForm = ({
                 <Label className="min-w-16">Latitude</Label>
                 <Input
                     type="number"
+                    inputMode="decimal"
                     value={Math.abs(latitude)}
                     min={0}
                     max={90}
                     onChange={(e) => {
-                        if (isNaN(parseFloat(e.target.value))) return;
+                        const normalizedInput = normalizeDecimalInput(
+                            e.target.value,
+                        );
+                        if (isNaN(normalizedInput)) return;
                         onChange(
-                            parseFloat(e.target.value) *
+                            normalizedInput *
                                 (latitude !== 0 ? Math.sign(latitude) : -1),
                             null,
                         );
