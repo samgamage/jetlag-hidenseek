@@ -53,3 +53,12 @@ export const updateMbtaRouteData = (
         }
     );
 };
+
+export const endGameStop = persistentAtom<Stop | null>(
+    "endGameStop",
+    null,
+    {
+        encode: JSON.stringify,
+        decode: JSON.parse,
+    }
+)
