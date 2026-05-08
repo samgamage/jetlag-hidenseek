@@ -1,5 +1,5 @@
 import { useStore } from "@nanostores/react";
-import { Plus, SidebarCloseIcon, XIcon } from "lucide-react";
+import { Plus, XIcon } from "lucide-react";
 
 import {
     Sidebar,

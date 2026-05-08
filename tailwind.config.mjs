@@ -59,18 +59,18 @@ export default {
     		},
     		fontFamily: {
     			poppins: [
-    				"'Poppins'"
+    				'Poppins'
     			],
-				oxygen: [
-					"'Oxygen'"
-				]
+    			oxygen: [
+    				'Oxygen'
+    			]
     		},
     		borderRadius: {
     			lg: 'var(--radius)',
     			md: 'calc(var(--radius) - 2px)',
     			sm: 'calc(var(--radius) - 4px)'
     		}
-    	},
+    	}
     },
     plugins: [require("tailwindcss-animate")],
 };

@@ -3,7 +3,6 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { atom } from "nanostores";
 import * as React from "react";
-import { TbMessage2Question } from "react-icons/tb";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
