@@ -1,6 +1,7 @@
 import { useStore } from "@nanostores/react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+    endGameStop,
     isLoading,
     mbtaData,
     mbtaRoutes,
@@ -14,6 +15,23 @@ import { decodePolyline } from "@/lib/mbta/utils";
 import { Marker, Polyline, Popup, Tooltip, useMap } from "react-leaflet";
 import type { Stop } from "@/lib/mbta/types";
 import { Icon } from "leaflet";
+import { Button } from "./ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+    DialogTrigger,
+} from "./ui/dialog";
+import { adjustPerRadius } from "@/maps/questions/radius";
+import {
+    addQuestion,
+    mapGeoJSON,
+    questions,
+    triggerLocalRefresh,
+} from "@/lib/context";
+import { Spinner } from "./ui/spinner";
 
 const routeIdColorMap = {
     "Green-B": "green",
@@ -25,6 +43,9 @@ const routeIdColorMap = {
     Red: "red",
     Mattapan: "red",
 };
+
+const STOP_ICON_URL =
+    "https://upload.wikimedia.org/wikipedia/commons/6/64/MBTA.svg";
 
 const ZoomAwareMarker = ({
     position,
@@ -65,11 +86,16 @@ const ZoomAwareMarker = ({
     );
 };
 
-export const MBTAOverlay = ({ className }: { className?: string }) => {
+export const MBTAOverlay = () => {
+    useStore(triggerLocalRefresh);
     const $isLoading = useStore(isLoading);
-    const $mbtaRoutes = useStore(mbtaRoutes);
     const $mbtaData = useStore(mbtaData);
     const $mbtaStops = useStore(mbtaStops);
+    const $questions = useStore(questions);
+    const $endGameStop = useStore(endGameStop);
+    const [activeStop, setActiveStop] = useState<Stop | null>(null);
+    const [isEndGameCircleLoading, setEndGameCircleLoading] = useState(false);
+    const [endGameConfirmOpen, setEndGameConfirmOpen] = useState(false);
 
     const allStopsNoDuplicates = useMemo(() => {
         const allStops: any = [];
@@ -146,6 +172,55 @@ export const MBTAOverlay = ({ className }: { className?: string }) => {
         }
     };
 
+    const handleEndGameActivate = useCallback(
+        async (stop: Stop) => {
+            if (endGameStop.get()?.name === stop.name) {
+                setEndGameConfirmOpen(false);
+                return;
+            }
+
+            try {
+                setEndGameCircleLoading(true);
+                endGameStop.set(stop);
+                addQuestion({
+                    id: "radius",
+                    data: {
+                        within: true,
+                        lat: stop.lat,
+                        lng: stop.lng,
+                        radius: 0.25,
+                        unit: "miles",
+                    },
+                });
+                setEndGameConfirmOpen(false);
+            } catch (err) {
+            } finally {
+                setEndGameCircleLoading(false);
+            }
+        },
+        [$endGameStop],
+    );
+
+    const handleEndGameDeactivate = useCallback(
+        async (stop: Stop) => {
+            try {
+                setEndGameCircleLoading(true);
+                endGameStop.set(null);
+                questions.set(
+                    $questions.filter(
+                        (q) =>
+                            q.data.lat !== stop.lat && q.data.lng !== stop.lng,
+                    ),
+                );
+                setEndGameConfirmOpen(false);
+            } catch (err) {
+            } finally {
+                setEndGameCircleLoading(false);
+            }
+        },
+        [$endGameStop],
+    );
+
     useEffect(() => {
         (async () => {
             try {
@@ -157,12 +232,6 @@ export const MBTAOverlay = ({ className }: { className?: string }) => {
             }
         })();
     }, []);
-
-    useEffect(() => {
-        $mbtaRoutes.forEach((route) => {
-            fetchPolyline(route.id);
-        });
-    }, [$mbtaRoutes]);
 
     if ($isLoading) {
         return null;
@@ -193,7 +262,7 @@ export const MBTAOverlay = ({ className }: { className?: string }) => {
                         minZoom={15}
                         icon={
                             new Icon({
-                                iconUrl: `https://upload.wikimedia.org/wikipedia/commons/6/64/MBTA.svg`,
+                                iconUrl: STOP_ICON_URL,
                                 iconSize: [15, 25],
                             })
                         }
@@ -202,7 +271,73 @@ export const MBTAOverlay = ({ className }: { className?: string }) => {
                             <h3 className="text-center font-semibold">
                                 {stop.name}
                             </h3>
-                            <p>{stop.description}</p>
+                            <Dialog
+                                open={endGameConfirmOpen}
+                                onOpenChange={(open) => {
+                                    setActiveStop(stop);
+                                    setEndGameConfirmOpen(open);
+                                }}
+                                key={`${routeId}-${stop.name}`}
+                            >
+                                {endGameStop.get()?.name === stop.name ? (
+                                    <Button
+                                        variant="secondary"
+                                        className="mt-2"
+                                        onClick={() => {
+                                            if (activeStop)
+                                                handleEndGameDeactivate(
+                                                    activeStop,
+                                                );
+                                        }}
+                                    >
+                                        Remove Endgame
+                                    </Button>
+                                ) : (
+                                    <DialogTrigger>
+                                        <Button
+                                            variant="secondary"
+                                            className="mt-2"
+                                        >
+                                            Trigger Endgame
+                                        </Button>
+                                    </DialogTrigger>
+                                )}
+                                <DialogContent>
+                                    <DialogTitle>Are you sure?</DialogTitle>
+                                    <DialogDescription>
+                                        This will mark{" "}
+                                        <strong>{activeStop?.name}</strong> as
+                                        the station the hiders are at and will
+                                        display a 1/4 mile radius around the
+                                        station.
+                                    </DialogDescription>
+                                    <DialogFooter className="flex flex-row gap-3">
+                                        <Button
+                                            className="w-full"
+                                            onClick={() =>
+                                                setEndGameConfirmOpen(false)
+                                            }
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            className="w-full"
+                                            variant="destructive"
+                                            onClick={() => {
+                                                if (activeStop)
+                                                    handleEndGameActivate(
+                                                        activeStop,
+                                                    );
+                                            }}
+                                        >
+                                            {isEndGameCircleLoading && (
+                                                <Spinner />
+                                            )}
+                                            Confirm
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         </Popup>
                     </ZoomAwareMarker>
                 );

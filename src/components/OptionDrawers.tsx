@@ -16,7 +16,7 @@ import {
     animateMapMovements,
     autoSave,
     autoZoom,
-    baseTileLayer,
+    mapTheme,
     customInitPreference,
     customPresets,
     customStations,
@@ -39,8 +39,6 @@ import {
     polyGeoJSON,
     questions,
     save,
-    showTutorial,
-    thunderforestApiKey,
     triggerLocalRefresh,
     useCustomStations,
 } from "@/lib/context";
@@ -67,6 +65,7 @@ import {
     SidebarMenuItem,
 } from "./ui/sidebar-l";
 import { UnitSelect } from "./UnitSelect";
+import { ExternalLink, Settings } from "lucide-react";
 
 const HIDING_ZONE_URL_PARAM = "hz";
 const HIDING_ZONE_COMPRESSED_URL_PARAM = "hzc";
@@ -83,8 +82,7 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
     const $autoSave = useStore(autoSave);
     const $hidingZone = useStore(hidingZone);
     const $planningMode = useStore(planningModeEnabled);
-    const $baseTileLayer = useStore(baseTileLayer);
-    const $thunderforestApiKey = useStore(thunderforestApiKey);
+    const $mapTheme = useStore(mapTheme);
     const $pastebinApiKey = useStore(pastebinApiKey);
     const $alwaysUsePastebin = useStore(alwaysUsePastebin);
     const $followMe = useStore(followMe);
@@ -279,11 +277,12 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
     return (
         <div
             className={cn(
-                "flex justify-end gap-2 max-[412px]:!mb-4 max-[340px]:flex-col",
+                "flex justify-end gap-3 max-[412px]:!mb-4 max-[340px]:flex-col",
                 className,
             )}
         >
             <Button
+                size="icon"
                 className="shadow-md"
                 onClick={async () => {
                     const hidingZoneString = JSON.stringify($hidingZone);
@@ -350,68 +349,26 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                 }}
                 data-tutorial-id="share-questions-button"
             >
-                Share
-            </Button>
-            <Button
-                className="w-24 shadow-md"
-                onClick={() => {
-                    showTutorial.set(true);
-                }}
-            >
-                Tutorial
+                <ExternalLink />
             </Button>
             <Drawer open={isOptionsOpen} onOpenChange={setOptionsOpen}>
-                <DrawerTrigger className="w-24" asChild>
+                <DrawerTrigger asChild>
                     <Button
-                        className="w-24 shadow-md"
                         data-tutorial-id="option-questions-button"
+                        size="icon"
+                        className="shadow-md"
                     >
-                        Options
+                        <Settings />
                     </Button>
                 </DrawerTrigger>
                 <DrawerContent>
                     <div className="flex flex-col items-center gap-4 mb-4">
                         <DrawerHeader>
-                            <DrawerTitle className="text-4xl font-semibold font-poppins">
-                                Options
+                            <DrawerTitle className="text-2xl font-semibold font-poppins">
+                                Settings
                             </DrawerTitle>
                         </DrawerHeader>
-                        <div className="overflow-y-scroll max-h-[40vh] flex flex-col items-center gap-4 max-w-[1000px] px-12">
-                            <div className="flex flex-row max-[330px]:flex-col gap-4">
-                                <Button
-                                    onClick={() => {
-                                        if (!navigator || !navigator.clipboard)
-                                            return toast.error(
-                                                "Clipboard not supported",
-                                            );
-                                        navigator.clipboard.writeText(
-                                            JSON.stringify($hidingZone),
-                                        );
-                                        toast.success(
-                                            "Hiding zone copied successfully",
-                                            {
-                                                autoClose: 2000,
-                                            },
-                                        );
-                                    }}
-                                >
-                                    Copy Hiding Zone
-                                </Button>
-                                <Button
-                                    onClick={() => {
-                                        if (!navigator || !navigator.clipboard)
-                                            return toast.error(
-                                                "Clipboard not supported",
-                                            );
-                                        navigator.clipboard
-                                            .readText()
-                                            .then(loadHidingZone);
-                                    }}
-                                >
-                                    Paste Hiding Zone
-                                </Button>
-                            </div>
-                            <Separator className="bg-slate-300 w-[280px]" />
+                        <div className="overflow-y-scroll max-h-[40vh] flex flex-col gap-4 max-w-[1000px] px-12">
                             <Label>Default Unit</Label>
                             <UnitSelect
                                 unit={$defaultUnit}
@@ -432,7 +389,7 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                                 }
                             />
                             <Separator className="bg-slate-300 w-[280px]" />
-                            <Label>Base map style</Label>
+                            <Label>Map theme</Label>
                             <Select
                                 trigger="Base map style"
                                 options={{
@@ -444,98 +401,11 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                                         "Thunderforest Neighbourhood",
                                     osmcarto: "OpenStreetMap Carto",
                                 }}
-                                value={$baseTileLayer}
-                                onValueChange={(v) =>
-                                    baseTileLayer.set(v as any)
-                                }
+                                value={$mapTheme}
+                                onValueChange={(v) => mapTheme.set(v as any)}
                             />
-                            <div className="flex flex-col items-center gap-2">
-                                <Label>Thunderforest API Key</Label>
-                                <Input
-                                    type="text"
-                                    value={$thunderforestApiKey}
-                                    id="thunderforestApiKey"
-                                    onChange={(e) =>
-                                        thunderforestApiKey.set(e.target.value)
-                                    }
-                                    placeholder="Enter your Thunderforest API key"
-                                />
-                                <p className="text-xs text-gray-500">
-                                    Needed for Thunderforest map styles. Create
-                                    a key{" "}
-                                    <a
-                                        href="https://manage.thunderforest.com/users/sign_up?price=hobby-project-usd"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-500 cursor-pointer"
-                                    >
-                                        here.
-                                    </a>{" "}
-                                    Don&apos;t worry, it&apos;s free.
-                                </p>
-                            </div>
-                            <Separator className="bg-slate-300 w-[280px]" />
-                            <div className="flex flex-col items-center gap-2">
-                                <Label>Pastebin API Key</Label>
-                                <Input
-                                    type="text"
-                                    value={$pastebinApiKey}
-                                    id="pastebinApiKey"
-                                    onChange={(e) =>
-                                        pastebinApiKey.set(e.target.value)
-                                    }
-                                    placeholder="Enter your Pastebin API key"
-                                />
-                                <p className="text-xs text-gray-500">
-                                    Needed for sharing large game data. Create a
-                                    key{" "}
-                                    <a
-                                        href="https://pastebin.com/doc_api"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-500 cursor-pointer"
-                                    >
-                                        here
-                                    </a>
-                                    .
-                                </p>
-                            </div>
-                            <Separator className="bg-slate-300 w-[280px]" />
-                            <Label>Permanent Map Overlay</Label>
-                            <div className="flex flex-row max-[330px]:flex-col gap-4">
-                                <Button
-                                    onClick={() => permanentOverlay.set(null)}
-                                >
-                                    Remove
-                                </Button>
-                                <Button
-                                    onClick={async () => {
-                                        if (!navigator || !navigator.clipboard)
-                                            return toast.error(
-                                                "Clipboard not supported",
-                                            );
-
-                                        try {
-                                            const clipboard =
-                                                await navigator.clipboard.readText();
-                                            const geojson =
-                                                JSON.parse(clipboard);
-                                            permanentOverlay.set(geojson);
-                                        } catch (e) {
-                                            toast.error(
-                                                `Invalid GeoJSON overlay: ${e}`,
-                                            );
-                                        }
-                                    }}
-                                >
-                                    Paste GeoJSON
-                                </Button>
-                            </div>
                             <Separator className="bg-slate-300 w-[280px]" />
                             <div className="flex flex-row items-center gap-2">
-                                <label className="text-2xl font-semibold font-poppins">
-                                    Animate map movements?
-                                </label>
                                 <Checkbox
                                     checked={$animateMapMovements}
                                     onCheckedChange={() => {
@@ -544,24 +414,11 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                                         );
                                     }}
                                 />
+                                <label className="text-lg font-poppins">
+                                    Animate map movements
+                                </label>
                             </div>
                             <div className="flex flex-row items-center gap-2">
-                                <label className="text-2xl font-semibold font-poppins">
-                                    Force Pastebin for sharing?
-                                </label>
-                                <Checkbox
-                                    checked={$alwaysUsePastebin}
-                                    onCheckedChange={() =>
-                                        alwaysUsePastebin.set(
-                                            !$alwaysUsePastebin,
-                                        )
-                                    }
-                                />
-                            </div>
-                            <div className="flex flex-row items-center gap-2">
-                                <label className="text-2xl font-semibold font-poppins">
-                                    Enable planning mode?
-                                </label>
                                 <Checkbox
                                     checked={$planningMode}
                                     onCheckedChange={() => {
@@ -585,44 +442,44 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                                         planningModeEnabled.set(!$planningMode);
                                     }}
                                 />
+                                <label className="text-lg font-poppins">
+                                    Planning mode
+                                </label>
                             </div>
                             <div className="flex flex-row items-center gap-2">
-                                <label className="text-2xl font-semibold font-poppins">
-                                    Auto save?
-                                </label>
                                 <Checkbox
                                     checked={$autoSave}
                                     onCheckedChange={() =>
                                         autoSave.set(!$autoSave)
                                     }
                                 />
+                                <label className="text-lg font-poppins">
+                                    Auto save
+                                </label>
                             </div>
                             <div className="flex flex-row items-center gap-2">
-                                <label className="text-2xl font-semibold font-poppins">
-                                    Auto zoom?
-                                </label>
                                 <Checkbox
                                     checked={$autoZoom}
                                     onCheckedChange={() =>
                                         autoZoom.set(!$autoZoom)
                                     }
                                 />
+                                <label className="text-lg font-poppins">
+                                    Auto zoom
+                                </label>
                             </div>
                             <div className="flex flex-row items-center gap-2">
-                                <label className="text-2xl font-semibold font-poppins">
-                                    Follow Me (GPS)?
-                                </label>
                                 <Checkbox
                                     checked={$followMe}
                                     onCheckedChange={() =>
                                         followMe.set(!$followMe)
                                     }
                                 />
+                                <label className="text-lg font-poppins">
+                                    Follow Me (GPS)
+                                </label>
                             </div>
                             <div className="flex flex-row items-center gap-2">
-                                <label className="text-2xl font-semibold font-poppins">
-                                    Default to custom questions?
-                                </label>
                                 <Checkbox
                                     checked={$defaultCustomQuestions}
                                     onCheckedChange={() =>
@@ -631,11 +488,11 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                                         )
                                     }
                                 />
+                                <label className="text-lg font-poppins">
+                                    Default to custom questions
+                                </label>
                             </div>
                             <div className="flex flex-row items-center gap-2">
-                                <label className="text-2xl font-semibold font-poppins">
-                                    Allow Google Plus codes?
-                                </label>
                                 <Checkbox
                                     checked={$allowGooglePlusCodes}
                                     onCheckedChange={() =>
@@ -644,11 +501,11 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                                         )
                                     }
                                 />
+                                <label className="text-lg font-poppins">
+                                    Allow Google Plus codes
+                                </label>
                             </div>
                             <div className="flex flex-row items-center gap-2">
-                                <label className="text-2xl font-semibold font-poppins">
-                                    Hider mode?
-                                </label>
                                 <Checkbox
                                     checked={!!$hiderMode}
                                     onCheckedChange={() => {
@@ -674,6 +531,9 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                                         }
                                     }}
                                 />
+                                <label className="text-lg font-poppins">
+                                    Hider mode
+                                </label>
                             </div>
                             {$hiderMode !== false && (
                                 <SidebarMenu>
@@ -712,6 +572,41 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                                     )}
                                 </SidebarMenu>
                             )}
+                            <Separator className="bg-slate-300 w-[280px]" />
+                            <div className="flex flex-row max-[330px]:flex-col gap-4">
+                                <Button
+                                    onClick={() => {
+                                        if (!navigator || !navigator.clipboard)
+                                            return toast.error(
+                                                "Clipboard not supported",
+                                            );
+                                        navigator.clipboard.writeText(
+                                            JSON.stringify($hidingZone),
+                                        );
+                                        toast.success(
+                                            "Hiding zone copied successfully",
+                                            {
+                                                autoClose: 2000,
+                                            },
+                                        );
+                                    }}
+                                >
+                                    Copy Hiding Zone
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        if (!navigator || !navigator.clipboard)
+                                            return toast.error(
+                                                "Clipboard not supported",
+                                            );
+                                        navigator.clipboard
+                                            .readText()
+                                            .then(loadHidingZone);
+                                    }}
+                                >
+                                    Paste Hiding Zone
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </DrawerContent>

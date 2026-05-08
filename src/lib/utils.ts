@@ -16,6 +16,11 @@ export const mapToObj = <T, K extends string, V>(
     fn: (item: T) => [K, V],
 ) => Object.fromEntries(arr.map(fn));
 
+export const normalizeDecimalInput = (value: string): number => {
+    const normalizedValue = value.replace(",", ".");
+    return parseFloat(normalizedValue);
+};
+
 export const compress = async (
     str: string,
     encoding = "deflate" as CompressionFormat,

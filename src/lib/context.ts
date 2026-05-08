@@ -157,7 +157,7 @@ export const animateMapMovements = persistentAtom<boolean>(
         decode: JSON.parse,
     },
 );
-export const hidingRadius = persistentAtom<number>("hidingRadius", 0.5, {
+export const hidingRadius = persistentAtom<number>("hidingRadius", 0.25, {
     encode: JSON.stringify,
     decode: JSON.parse,
 });
@@ -325,17 +325,10 @@ export const autoZoom = persistentAtom<boolean>("autoZoom", true, {
 
 export const isLoading = atom<boolean>(false);
 
-export const baseTileLayer = persistentAtom<
+export const mapTheme = persistentAtom<
     "voyager" | "light" | "dark" | "transport" | "neighbourhood" | "osmcarto"
->("baseTileLayer", "voyager");
-export const thunderforestApiKey = persistentAtom<string>(
-    "thunderforestApiKey",
-    "",
-    {
-        encode: (value: string) => value,
-        decode: (value: string) => value,
-    },
-);
+>("mapTheme", "voyager");
+
 export const followMe = persistentAtom<boolean>("followMe", false, {
     encode: JSON.stringify,
     decode: JSON.parse,

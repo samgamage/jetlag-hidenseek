@@ -1,5 +1,5 @@
 import { useStore } from "@nanostores/react";
-import { SidebarCloseIcon } from "lucide-react";
+import { Plus, SidebarCloseIcon, XIcon } from "lucide-react";
 
 import {
     Sidebar,
@@ -38,8 +38,8 @@ export const QuestionSidebar = () => {
         <Sidebar>
             <div className="flex items-center justify-between">
                 <h2 className="ml-4 mt-4 font-poppins text-2xl">Questions</h2>
-                <SidebarCloseIcon
-                    className="mr-2 visible md:hidden"
+                <XIcon
+                    className="mr-4 mt-4 visible md:hidden"
                     onClick={() => {
                         SidebarContext.get().setOpenMobile(false);
                     }}
@@ -92,17 +92,22 @@ export const QuestionSidebar = () => {
                             return null;
                     }
                 })}
+                <SidebarMenuItem className="p-4">
+                    <AddQuestionDialog>
+                        <SidebarMenuButton
+                            disabled={$isLoading}
+                            className="bg-green-500 hover:bg-green-400 flex items-center justify-center"
+                        >
+                            <div className="flex flex-row items-center gap-2 font-semibold text-lg">
+                                Add Question <Plus size={18} />
+                            </div>
+                        </SidebarMenuButton>
+                    </AddQuestionDialog>
+                </SidebarMenuItem>
             </SidebarContent>
             <SidebarGroup>
                 <SidebarGroupContent>
-                    <SidebarMenu data-tutorial-id="add-questions-buttons">
-                        <SidebarMenuItem>
-                            <AddQuestionDialog>
-                                <SidebarMenuButton disabled={$isLoading}>
-                                    Add Question
-                                </SidebarMenuButton>
-                            </AddQuestionDialog>
-                        </SidebarMenuItem>
+                    <SidebarMenu data-tutorial-id="save-button">
                         {!$autoSave && (
                             <SidebarMenuItem>
                                 <SidebarMenuButton
