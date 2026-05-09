@@ -15,8 +15,8 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useIsMobile } from "@/hooks/useMobile";
-import { useTutorialStep } from "@/hooks/useTutorialStep";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useTutorialStep } from "@/hooks/use-tutorial-step";
 import { cn } from "@/lib/utils";
 import { MessageCircleQuestion } from "lucide-react";
 
@@ -285,7 +285,7 @@ const Sidebar = React.forwardRef<
 Sidebar.displayName = "Sidebar";
 
 const SidebarTrigger = React.forwardRef<
-    React.ComponentRef<typeof Button>,
+    React.ElementRef<typeof Button>,
     React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
     const { toggleSidebar } = useStore(SidebarContext);
@@ -296,7 +296,7 @@ const SidebarTrigger = React.forwardRef<
             data-sidebar="trigger"
             size="icon"
             className={cn(
-                "h-18 w-18 rounded-full text-white bg-gradient-to-r from-red-400 via-red-500 to-orange-600 focus:ring-2 focus:ring-blue-700 font-medium text-sm p-4 text-center transition-all duration-500 flex items-center justify-center shadow-xl active:bg-green-700",
+                "h-18 w-18 rounded-full text-white cursor-pointer bg-gradient-to-r from-red-400 via-red-500 to-orange-600 focus:ring-2 focus:ring-blue-700 font-medium text-sm p-4 text-center transition-all duration-500 flex items-center justify-center shadow-xl",
                 className,
             )}
             onClick={(event) => {
@@ -305,7 +305,7 @@ const SidebarTrigger = React.forwardRef<
             }}
             {...props}
         >
-            <MessageCircleQuestion size={24} />
+            <MessageCircleQuestion />
         </button>
     );
 });
@@ -359,7 +359,7 @@ const SidebarInset = React.forwardRef<
 SidebarInset.displayName = "SidebarInset";
 
 const SidebarInput = React.forwardRef<
-    React.ComponentRef<typeof Input>,
+    React.ElementRef<typeof Input>,
     React.ComponentProps<typeof Input>
 >(({ className, ...props }, ref) => {
     return (
@@ -407,7 +407,7 @@ const SidebarFooter = React.forwardRef<
 SidebarFooter.displayName = "SidebarFooter";
 
 const SidebarSeparator = React.forwardRef<
-    React.ComponentRef<typeof Separator>,
+    React.ElementRef<typeof Separator>,
     React.ComponentProps<typeof Separator>
 >(({ className, ...props }, ref) => {
     return (
@@ -430,7 +430,7 @@ const SidebarContent = React.forwardRef<
             ref={ref}
             data-sidebar="content"
             className={cn(
-                "flex min-h-0 flex-1 flex-col gap-4 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+                "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
                 className,
             )}
             {...props}
