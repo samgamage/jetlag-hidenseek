@@ -19,13 +19,13 @@ jobs:
               uses: actions/checkout@v6
             - name: Install, build, and upload your site
               uses: withastro/action@v6
-              env:
-                  PUBLIC_MBTA_APIKEY: ${{ vars.PUBLIC_MBTA_APIKEY }}
-                  PUBLIC_THUNDERFOREST_APIKEY: ${{ vars.PUBLIC_THUNDERFOREST_APIKEY }}
               with:
                   path: . # The root location of your Astro project inside the repository. (optional)
                   node-version: 22 # The specific version of Node that should be used to build your site. Defaults to 20. (optional)
                   package-manager: pnpm@8 # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
+              env:
+                  PUBLIC_MBTA_APIKEY: "6aca4bb97c674c5985a916f58c06ca79"
+                  PUBLIC_THUNDERFOREST_APIKEY: "e94fdaa548764e53a4c7992162a16d86"
 
     deploy:
         needs: build
