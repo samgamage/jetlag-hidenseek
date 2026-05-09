@@ -300,8 +300,8 @@ const SidebarTrigger = React.forwardRef<
                 className,
             )}
             onClick={(event) => {
-                onClick?.(event);
                 toggleSidebar();
+                onClick?.(event);
             }}
             {...props}
         >
